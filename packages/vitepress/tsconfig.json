@@ -31,6 +31,7 @@
     "src/client/index.ts",
     "src/client/styles.d.ts",
     "src/client/app/createDocsApp.tsx",
+    "src/client/app/router.ts",
     "src/client/entry.ts",
     "src/client/virtual.d.ts",
     "src/node/cli.ts",

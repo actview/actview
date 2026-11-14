@@ -1,6 +1,7 @@
 import { ActViewComponent, Component, Dynamic, Prop } from 'actview'
 import { useData } from '../composables/data'
 import { useLayout } from '../composables/layout'
+import { useRoute } from '../composables/route'
 import { VPDoc } from './VPDoc'
 import { VPHome } from './VPHome'
 import { VPPage } from './VPPage'
@@ -28,6 +29,8 @@ export class VPContent extends ActViewComponent<VPContentProps> {
     const props = this.$props
     const { page, frontmatter } = useData()
     const { isHome, hasSidebar } = useLayout()
+    const currentRoute = useRoute()
+    const component = currentRoute.value.component ?? props.content
     return (
       <div
         class={[
@@ -46,11 +49,11 @@ export class VPContent extends ActViewComponent<VPContentProps> {
             <div class="NotFound">Page not found.</div>
           )
         ) : frontmatter.value.layout === 'page' ? (
-          <VPPage content={props.content} pageTop={props.pageTop} pageBottom={props.pageBottom} />
+          <VPPage content={component} pageTop={props.pageTop} pageBottom={props.pageBottom} />
         ) : frontmatter.value.layout === 'home' ? (
-          <VPHome content={props.content} />
+          <VPHome content={component} />
         ) : (
-          <VPDoc content={props.content} {...props} />
+          <VPDoc content={component} {...props} />
         )}
       </div>
     )

@@ -3,19 +3,16 @@ import {
   Component,
   Mounted,
   Prop,
-  Ref,
   Unmounted,
   createApp,
 } from 'actview'
 import { Layout } from '../theme-default/Layout'
-import { setHeaders, setSidebar } from '../theme-default/composables/layout'
+import { setSidebar } from '../theme-default/composables/layout'
 import { setPageData, setThemeData } from '../theme-default/composables/data'
-import { route } from '../theme-default/composables/route'
+import { createRouter, type DocsPageModule } from './router'
+import type { Router } from '../theme-default/composables/route'
 
-export type DocsPageModule = {
-  default: any
-  __pageData?: any
-}
+export type { DocsPageModule }
 
 export interface DocsAppOptions {
   pages: Record<string, () => Promise<DocsPageModule>>
@@ -26,7 +23,7 @@ export interface DocsAppOptions {
 
 function normalizeRoute(path: string): string {
   if (!path || path === '/') return '/'
-  return path.replace(/\/+$/, '')
+  return path.replace(/\.html$/, '').replace(/\/+$/, '') || '/'
 }
 
 function resolvePageKey(
@@ -45,70 +42,46 @@ function resolvePageKey(
 }
 
 @Component({ name: 'DocsApp' })
-export class DocsApp extends ActViewComponent<DocsAppOptions> {
+export class DocsApp extends ActViewComponent<{ router: Router }> {
   @Prop
-  pages!: Record<string, () => Promise<DocsPageModule>>
-  @Prop
-  themeConfig?: Record<string, any>
-
-  @Ref
-  page: any = null
-  @Ref
-  loading = true
-  private popstateHandler = () => {
-    void this.load(location.pathname)
-  }
+  router!: Router
 
   @Mounted
   mounted(): void {
-    void this.load(location.pathname)
-    window.addEventListener('popstate', this.popstateHandler)
+    if (typeof window !== 'undefined') {
+      void this.$props.router.go(window.location.href, { initialLoad: true })
+    }
   }
 
   @Unmounted
   unmounted(): void {
-    window.removeEventListener('popstate', this.popstateHandler)
-  }
-
-  private async load(path: string): Promise<void> {
-    this.loading = true
-    const key = resolvePageKey(this.$props.pages, path)
-    if (!key) {
-      this.page = null
-      this.loading = false
-      return
-    }
-    const module = await this.$props.pages[key]()
-    setPageData(module.__pageData ?? {})
-    setHeaders(module.__pageData?.headers ?? [])
-    const sidebar = this.$props.themeConfig?.sidebar
-    setSidebar(Array.isArray(sidebar) ? sidebar : [])
-    route.value = {
-      path: normalizeRoute(path),
-      hash: typeof location !== 'undefined' ? location.hash : '',
-      query: '',
-      data: module.__pageData,
-    }
-    this.page = module.default
-    this.loading = false
+    this.$props.router.dispose()
   }
 
   render() {
-    if (this.loading && !this.page) {
-      return <div class="vp-loading">Loading…</div>
-    }
-    return <Layout page={this.page} />
+    return <Layout />
   }
 }
+
 export function createDocsApp(options: DocsAppOptions) {
   setThemeData({
     ...(options.siteData ?? {}),
     themeConfig: options.themeConfig ?? {},
   })
-  const app = createApp(DocsApp as any, {
-    pages: options.pages,
-    themeConfig: options.themeConfig ?? {},
+  setPageData({ relativePath: 'index.md', frontmatter: {}, headers: [] })
+  setSidebar(
+    Array.isArray(options.themeConfig?.sidebar)
+      ? options.themeConfig.sidebar
+      : [],
+  )
+
+  const router = createRouter(async (path) => {
+    const key = resolvePageKey(options.pages, path)
+    if (!key) return null
+    return options.pages[key]()
   })
+
+  const app = createApp(DocsApp as any, { router })
   app.mount(options.container ?? '#app')
   return app
 }
