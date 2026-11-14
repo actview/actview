@@ -6,6 +6,7 @@ import './theme-default/styles/components/vp-doc.css'
 import './theme-default/styles/components/vp-code.css'
 import './theme-default/styles/components/custom-block.css'
 import './theme-default/styles/components/vp-sponsor.css'
+import 'katex/dist/katex.min.css'
 import { createDocsApp } from './app/createDocsApp'
 import { siteConfig } from 'virtual:actview-site'
 
@@ -16,6 +17,7 @@ const pages = import.meta.glob('/**/*.md') as Record<
 
 createDocsApp({
   pages,
+  routes: siteConfig.routes ?? {},
   container: '#app',
   siteData: siteConfig,
   themeConfig: siteConfig.themeConfig ?? {},

@@ -98,6 +98,43 @@ class Counter extends ActViewComponent {
 示例见 [counter.md](../playground/vitepress/counter.md) 和
 [counter-inline.md](../playground/vitepress/counter-inline.md)。
 
+## P2 能力
+
+CLI 配置支持：
+
+```ts
+export default {
+  lastUpdated: true,
+  rewrites: { '/guide': '/old-guide' },
+  dynamicRoutes: [{ path: '/dynamic/42', file: 'dynamic.md' }],
+  transformPageData(data) {
+    return { title: data.title.toUpperCase() }
+  },
+  markdown: {
+    config(md) {
+      // md.use(yourPlugin)
+    },
+  },
+}
+```
+
+已接入：
+
+- KaTeX 数学公式：`$...$` / `$$...$$`
+- CJK friendly emphasis
+- dead link 检查
+- rewrites
+- dynamic routes
+- git `lastUpdated`
+- `transformPageData`
+- 自定义 markdown-it `config` 插件
+
+示例页面：
+
+- [p2-math.md](../playground/vitepress/p2-math.md)
+- [p2-cjk.md](../playground/vitepress/p2-cjk.md)
+- [p2-config.md](../playground/vitepress/p2-config.md)
+
 Markdown 渲染接口现在是异步的：
 
 ```ts

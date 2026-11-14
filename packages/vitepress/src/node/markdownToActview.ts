@@ -8,6 +8,9 @@ import anchor from 'markdown-it-anchor'
 import attrs from 'markdown-it-attrs'
 import { full as emoji } from 'markdown-it-emoji'
 import { parseFragment, type DefaultTreeAdapterMap } from 'parse5'
+import katex from '@traptitech/markdown-it-katex'
+import cjkFriendly from 'markdown-it-cjk-friendly'
+import path from 'node:path'
 import { applyContainers, applyGithubAlerts, applyToc } from './markdown/plugins'
 import { renderCodeBlock } from './markdown/highlight'
 import { processIncludes } from './markdown/includes'
@@ -23,6 +26,9 @@ export interface PageData {
   relativePath: string
   frontmatter: Record<string, any>
   headers: Array<{ level: number; title: string; slug: string; link: string }>
+  lastUpdated?: number
+  params?: Record<string, any>
+  description?: string
 }
 
 export interface MarkdownToActviewResult {
@@ -35,6 +41,17 @@ export interface MarkdownToActviewOptions {
   html?: boolean
   lineNumbers?: boolean
   codeCopyButtonTitle?: string
+  root?: string
+  pages?: string[]
+  rewrites?: Record<string, string>
+  dynamicRoutes?: Array<{ path: string; file?: string }>
+  ignoreDeadLinks?:
+    | boolean
+    | 'localhostLinks'
+    | Array<string | RegExp | ((url: string, file: string) => boolean)>
+  transformPageData?: (data: PageData, ctx: { file: string }) => any
+  markdownConfig?: { config?: (md: any) => void | Promise<void> }
+  getLastUpdated?: (file: string) => number | undefined | Promise<number | undefined>
 }
 
 const md = new MarkdownIt({
@@ -53,6 +70,8 @@ md.use(anchor, {
 })
 md.use(attrs as any)
 md.use(emoji as any)
+md.use(katex as any, { throwOnError: false })
+md.use(cjkFriendly as any)
 applyContainers(md)
 applyGithubAlerts(md)
 applyToc(md)
@@ -173,6 +192,112 @@ function assertSupported(html: string, file: string): void {
   }
 }
 
+const configuredMarkdown = new WeakSet<object>()
+
+async function applyMarkdownConfig(
+  config?: MarkdownToActviewOptions['markdownConfig'],
+): Promise<void> {
+  if (!config?.config || configuredMarkdown.has(config)) return
+  configuredMarkdown.add(config)
+  await config.config(md)
+}
+
+function normalizeFile(file: string): string {
+  return path.resolve(file).replace(/\\/g, '/')
+}
+
+function normalizeRoutePath(pathname: string): string {
+  let value = (pathname || '/').replace(/\.html$/, '')
+  if (!value.startsWith('/')) value = `/${value}`
+  if (value.length > 1) value = value.replace(/\/+$/, '')
+  return value || '/'
+}
+
+function isIgnoredLink(
+  url: string,
+  file: string,
+  ignore: MarkdownToActviewOptions['ignoreDeadLinks'],
+): boolean {
+  if (ignore === true) return true
+  if (ignore === 'localhostLinks') {
+    return url.replace(/^https?:/, '').startsWith('//localhost')
+  }
+  if (!Array.isArray(ignore)) return false
+  return ignore.some((item) => {
+    if (typeof item === 'string') return item === url
+    if (item instanceof RegExp) return item.test(url)
+    return item(url, file)
+  })
+}
+
+function checkDeadLinks(
+  tokens: Array<{ type: string; attrGet: (name: string) => string | null }>,
+  file: string,
+  options: MarkdownToActviewOptions,
+): void {
+  if (!options.pages || options.ignoreDeadLinks === true) return
+  const pages = new Set(options.pages.map(normalizeFile))
+  const root = path.resolve(options.root ?? path.dirname(file))
+
+  for (const token of tokens) {
+    const inspect = (current: any): void => {
+      if (current.type === 'link_open') {
+        const href = current.attrGet('href')
+        if (!href || href.startsWith('#') || /^(?:mailto|tel|https?:)/i.test(href)) {
+          return
+        }
+        if (isIgnoredLink(href, file, options.ignoreDeadLinks)) return
+
+        const pathname = decodeURIComponent(href.split(/[?#]/)[0]).replace(/\.md$/, '')
+        if (!pathname) return
+        if (/\.(?:png|jpe?g|gif|svg|webp|avif|ico|pdf|zip|mp4|webm|css|js|json|txt)$/i.test(pathname)) {
+          return
+        }
+        if (
+          options.dynamicRoutes?.some(
+            (route) => normalizeRoutePath(route.path) === normalizeRoutePath(pathname),
+          )
+        ) {
+          return
+        }
+
+        const base = pathname.startsWith('/')
+          ? path.join(root, pathname.slice(1))
+          : path.resolve(path.dirname(file), pathname)
+        const target = base.replace(/\/$/, '')
+        const candidates = [
+          `${target}.md`,
+          path.join(target, 'index.md'),
+        ].map(normalizeFile)
+
+        if (candidates.some((candidate) => pages.has(candidate))) return
+        if (options.rewrites) {
+          const matched = Object.entries(options.rewrites).some(([source, dest]) => {
+            const sourceFile = normalizeFile(
+              path.join(
+                root,
+                source
+                  .replace(/^\/+/, '')
+                  .replace(/\.md$/, '') + '.md',
+              ),
+            )
+            const destPath = dest.replace(/\.md$/, '').replace(/^\//, '')
+            const linkPath = pathname.replace(/^\//, '')
+            return pages.has(sourceFile) && destPath === linkPath
+          })
+          if (matched) return
+        }
+
+        throw new Error(`[actview/vitepress] Dead link in ${file}: ${href}`)
+      }
+      if (Array.isArray(current.children)) {
+        for (const child of current.children) inspect(child)
+      }
+    }
+    inspect(token)
+  }
+}
+
 function buildPageData(
   parsed: matter.GrayMatterFile<string>,
   html: string,
@@ -266,9 +391,12 @@ export async function markdownToActview(
   const included = processIncludes(parsed.content, file)
   const extracted = extractScripts(included)
   const content = extracted.source
+  await applyMarkdownConfig(options.markdownConfig)
   const tokens = md.parse(content, {})
   const lineNumbers = options.lineNumbers ?? false
   const copyButtonTitle = options.codeCopyButtonTitle ?? 'Copy Code'
+
+  checkDeadLinks(tokens as any, file, options)
 
   for (const token of tokens) {
     if (token.type !== 'fence') continue
@@ -283,19 +411,27 @@ export async function markdownToActview(
   const html = md.renderer.render(tokens, md.options, {})
   assertSupported(html, file)
   const pageData = buildPageData(parsed, html, file)
+  const transformed = await options.transformPageData?.(pageData, { file })
+  const finalPageData = transformed
+    ? { ...pageData, ...transformed }
+    : pageData
+  if (options.getLastUpdated) {
+    const timestamp = await options.getLastUpdated(file)
+    if (timestamp) finalPageData.lastUpdated = timestamp
+  }
   const script = extracted.scripts.map((item) => item.content).join('\n')
 
   if (extracted.scripts.length) {
     return {
-      code: buildComponentCode(script, html, pageData),
+      code: buildComponentCode(script, html, finalPageData),
       html: `<div class="vp-doc">${html}</div>`,
-      pageData,
+      pageData: finalPageData,
     }
   }
 
   return {
-    code: buildPlainCode(html, pageData),
+    code: buildPlainCode(html, finalPageData),
     html: `<div class="vp-doc">${html}</div>`,
-    pageData,
+    pageData: finalPageData,
   }
 }

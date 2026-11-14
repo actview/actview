@@ -17,6 +17,7 @@ export type { DocsPageModule }
 
 export interface DocsAppOptions {
   pages: Record<string, () => Promise<DocsPageModule>>
+  routes?: Record<string, string>
   themeConfig?: Record<string, any>
   siteData?: Record<string, any>
   container?: Element | string
@@ -78,7 +79,8 @@ export function createDocsApp(options: DocsAppOptions) {
   )
 
   const router = createRouter(async (path) => {
-    const key = resolvePageKey(options.pages, path)
+    const mapped = options.routes?.[normalizeRoute(path)]
+    const key = mapped ?? resolvePageKey(options.pages, path)
     if (!key) return null
     return options.pages[key]()
   })

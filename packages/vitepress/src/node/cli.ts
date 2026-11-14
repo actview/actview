@@ -4,6 +4,8 @@ import path from 'node:path'
 import { createServer, type Plugin } from 'vite'
 import jsxScoped from '@10coding/vite-plugin-jsx-scoped'
 import { actviewMarkdown } from './actviewPlugin'
+import { buildRouteMap, scanMarkdownFiles, type DynamicRouteConfig } from './routeMap'
+import { getGitTimestamp } from './git'
 
 const VIRTUAL_SITE = 'virtual:actview-site'
 
@@ -12,6 +14,13 @@ export interface ActPressConfig {
   description?: string
   themeConfig?: Record<string, any>
   srcDir?: string
+  rewrites?: Record<string, string>
+  dynamicRoutes?: DynamicRouteConfig[]
+  ignoreDeadLinks?: boolean | 'localhostLinks' | Array<any>
+  transformPageData?: (data: any, ctx: any) => any
+  markdown?: { config?: (md: any) => void | Promise<void> }
+  lastUpdated?: boolean
+  routes?: Record<string, string>
 }
 
 export interface ActPressOptions {
@@ -101,6 +110,13 @@ export async function dev(options: ActPressOptions): Promise<void> {
     : existsSync(entryTs)
       ? entryTs
       : entryJs
+  const pages = scanMarkdownFiles(docsRoot)
+  const routes = buildRouteMap({
+    root: docsRoot,
+    rewrites: options.config.rewrites,
+    dynamicRoutes: options.config.dynamicRoutes,
+  })
+  const siteConfig = { ...options.config, routes }
   const server = await createServer({
     root: docsRoot,
     configFile: false,
@@ -124,9 +140,19 @@ export async function dev(options: ActPressOptions): Promise<void> {
       },
     },
     plugins: [
-      siteDataPlugin(options.config),
+      siteDataPlugin(siteConfig),
       jsxScoped(),
-      actviewMarkdown(),
+      actviewMarkdown({
+        pages,
+        root: docsRoot,
+        rewrites: options.config.rewrites,
+        dynamicRoutes: options.config.dynamicRoutes,
+        ignoreDeadLinks: options.config.ignoreDeadLinks,
+        transformPageData: options.config.transformPageData,
+        markdownConfig: options.config.markdown,
+        getLastUpdated:
+          options.config.lastUpdated === false ? undefined : getGitTimestamp,
+      }),
       htmlFallbackPlugin(entryPath),
     ],
     server: {
