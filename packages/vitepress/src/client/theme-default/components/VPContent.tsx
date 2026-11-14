@@ -53,7 +53,7 @@ export class VPContent extends ActViewComponent<VPContentProps> {
         ) : frontmatter.value.layout === 'home' ? (
           <VPHome content={component} />
         ) : (
-          <VPDoc content={component} {...props} />
+          <VPDoc {...props} content={component} />
         )}
       </div>
     )
