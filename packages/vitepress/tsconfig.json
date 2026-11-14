@@ -33,6 +33,7 @@
     "src/client/app/createDocsApp.tsx",
     "src/client/app/router.ts",
     "src/client/entry.ts",
+    "src/client/setupCode.ts",
     "src/client/virtual.d.ts",
     "src/node/cli.ts",
     "src/client/markdown",
@@ -45,7 +46,10 @@
     "src/client/theme-default/composables/nav.ts",
     "src/client/theme-default/composables/langs.ts",
     "src/node/markdownToActview.ts",
-    "src/node/actviewPlugin.ts"
+    "src/node/actviewPlugin.ts",
+    "src/node/markdown/plugins.ts",
+    "src/node/markdown/highlight.ts",
+    "src/node/markdown/includes.ts"
   ],
   "references": [
     { "path": "../shared" },

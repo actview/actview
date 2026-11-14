@@ -5,6 +5,7 @@ export default {
     nav: [
       { text: 'Guide', link: '/' },
       { text: 'Guide page', link: '/guide' },
+      { text: 'Markdown', link: '/markdown' },
     ],
     sidebar: [
       {
@@ -12,6 +13,7 @@ export default {
         items: [
           { text: 'Markdown MVP', link: '/' },
           { text: 'Guide page', link: '/guide' },
+          { text: 'Markdown 功能', link: '/markdown' },
         ],
       },
     ],

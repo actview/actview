@@ -41,6 +41,30 @@ actview-press dev <docs-root>
 `playground/vitepress` 不需要写 `main.ts`、`vite.config.ts` 或手动调用
 `createDocsApp`；页面、默认主题、Markdown 插件、scoped CSS 都由 CLI 装配。
 
+## Markdown 支持
+
+已接入：
+
+- 容器：`::: tip/info/warning/danger/details`、`code-group`、`v-pre`、`raw`
+- GitHub Alerts：`> [!TIP]`
+- Shiki 语法高亮、行高亮 `{1,3-5}`、行号 `:line-numbers`
+- 代码块标题 `[filename]`、复制按钮、代码组 tab
+- `[[toc]]`
+- `markdown-it-attrs`：`{#id .class}`
+- emoji：`:smile:`
+- 标题永久链接
+- `<<<` 代码片段、`<!--@include: ...-->`
+- 内部 `.md` 链接规范化、外链 `target="_blank"`
+- 图片 `loading="lazy"`
+
+示例见 [playground/vitepress/markdown.md](../playground/vitepress/markdown.md)。
+
+Markdown 渲染接口现在是异步的：
+
+```ts
+const result = await markdownToActview(source, file)
+```
+
 示例：
 
 ```text

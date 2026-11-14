@@ -9,6 +9,7 @@ import {
 import { Layout } from '../theme-default/Layout'
 import { setSidebar } from '../theme-default/composables/layout'
 import { setPageData, setThemeData } from '../theme-default/composables/data'
+import { setupCodeHandlers } from '../setupCode'
 import { createRouter, type DocsPageModule } from './router'
 import type { Router } from '../theme-default/composables/route'
 
@@ -64,6 +65,7 @@ export class DocsApp extends ActViewComponent<{ router: Router }> {
 }
 
 export function createDocsApp(options: DocsAppOptions) {
+  setupCodeHandlers()
   setThemeData({
     ...(options.siteData ?? {}),
     themeConfig: options.themeConfig ?? {},

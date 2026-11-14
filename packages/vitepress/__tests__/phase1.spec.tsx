@@ -39,8 +39,8 @@ describe('htmlToVNode', () => {
     expect(vnode.props?.children).toHaveLength(1)
   })
 
-  it('转换结果可以直接挂载', () => {
-    const source = markdownToActview('# Mounted\n\nHello **world**', 'mounted.md')
+  it('转换结果可以直接挂载', async () => {
+    const source = await markdownToActview('# Mounted\n\nHello **world**', 'mounted.md')
     @Component({ name: 'MountedPage' })
     class Page extends ActViewComponent {
       render() {
@@ -53,7 +53,7 @@ describe('htmlToVNode', () => {
     const app = createApp(Page)
     app.mount(root)
 
-    expect(root.querySelector('h1')?.textContent).toBe('Mounted')
+    expect(root.querySelector('h1')?.textContent).toBe('Mounted #')
     expect(root.querySelector('strong')?.textContent).toBe('world')
 
     app.unmount()
@@ -62,8 +62,8 @@ describe('htmlToVNode', () => {
 })
 
 describe('markdownToActview', () => {
-  it('frontmatter / 标题 id / 页面模块', () => {
-    const result = markdownToActview(
+  it('frontmatter / 标题 id / 页面模块', async () => {
+    const result = await markdownToActview(
       `---\ntitle: Intro\n---\n\n# Hello\n\n\`\`\`ts\nconst x = 1\n\`\`\`\n`,
       'guide.md',
     )
@@ -76,25 +76,62 @@ describe('markdownToActview', () => {
     expect(result.code).toContain('Component({ name: "guide.md" })(Page)')
   })
 
-  it('拒绝 <script setup>', () => {
-    expect(() =>
-      markdownToActview('# Guide\n\n<script setup>const x = 1</script>', 'guide.md'),
-    ).toThrow(/script setup/)
+  it('拒绝 <script setup>', async () => {
+    await expect(
+      markdownToActview(
+        '# Guide\n\n<script setup>const x = 1</script>',
+        'guide.md',
+      ),
+    ).rejects.toThrow(/script setup/)
   })
 
-  it('拒绝 Vue 指令', () => {
-    expect(() =>
+  it('拒绝 Vue 指令', async () => {
+    await expect(
       markdownToActview('<div v-if="ok">x</div>', 'guide.md'),
-    ).toThrow(/Vue 模板指令/)
+    ).rejects.toThrow(/Vue 模板指令/)
   })
 
-  it('拒绝正文插值，但代码块里的示例允许', () => {
-    expect(() =>
+  it('拒绝正文插值，但代码块里的示例允许', async () => {
+    await expect(
       markdownToActview('# Hi\n\nHello {{ name }}', 'guide.md'),
-    ).toThrow(/插值/)
+    ).rejects.toThrow(/插值/)
 
-    expect(() =>
+    await expect(
       markdownToActview('# Hi\n\n```text\n{{ name }}\n```', 'guide.md'),
-    ).not.toThrow()
+    ).resolves.toBeTruthy()
+  })
+
+  it('P0/P1 容器、代码高亮、TOC、attrs、emoji', async () => {
+    const result = await markdownToActview(
+      [
+        '# Guide',
+        '',
+        '## Section {#custom .lead}',
+        '',
+        '[[toc]]',
+        '',
+        '::: tip',
+        'hello',
+        ':::',
+        '',
+        '> [!TIP]',
+        '> alert',
+        '',
+        '```ts{1} [app.ts]',
+        'const x: number = 1',
+        '```',
+        '',
+        ':smile:',
+      ].join('\n'),
+      'features.md',
+    )
+
+    expect(result.html).toContain('tip custom-block')
+    expect(result.html).toContain('github-alert')
+    expect(result.html).toContain('class="shiki')
+    expect(result.html).toContain('class="line highlighted"')
+    expect(result.html).toContain('toc-list')
+    expect(result.html).toContain('id="custom"')
+    expect(result.html).toContain('😄')
   })
 })

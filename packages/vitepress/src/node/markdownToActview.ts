@@ -1,11 +1,16 @@
 // ============================================================
-// Markdown → ActView 页面模块（Phase 1）
+// Markdown → ActView 页面模块
 // ============================================================
 
 import matter from 'gray-matter'
 import MarkdownIt from 'markdown-it'
 import anchor from 'markdown-it-anchor'
+import attrs from 'markdown-it-attrs'
+import { full as emoji } from 'markdown-it-emoji'
 import { parseFragment, type DefaultTreeAdapterMap } from 'parse5'
+import { applyContainers, applyGithubAlerts, applyToc } from './markdown/plugins'
+import { renderCodeBlock } from './markdown/highlight'
+import { processIncludes } from './markdown/includes'
 
 export interface PageData {
   title: string
@@ -21,8 +26,9 @@ export interface MarkdownToActviewResult {
 }
 
 export interface MarkdownToActviewOptions {
-  /** markdown-it 的 html 选项，默认 true（VitePress 默认允许 HTML） */
   html?: boolean
+  lineNumbers?: boolean
+  codeCopyButtonTitle?: string
 }
 
 const md = new MarkdownIt({
@@ -32,8 +38,55 @@ const md = new MarkdownIt({
 })
 
 md.use(anchor, {
-  level: [1, 2, 3, 4],
+  level: [1, 2, 3, 4, 5, 6],
+  permalink: anchor.permalink.linkInsideHeader({
+    symbol: '#',
+    placement: 'after',
+    ariaHidden: true,
+  }),
 })
+md.use(attrs)
+md.use(emoji)
+applyContainers(md)
+applyGithubAlerts(md)
+applyToc(md)
+
+const defaultFence = md.renderer.rules.fence!
+const defaultLinkOpen =
+  md.renderer.rules.link_open ??
+  ((tokens: any, idx: number, options: any, _env: any, self: any) =>
+    self.renderToken(tokens, idx, options))
+const defaultImage = md.renderer.rules.image!
+
+md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+  const token = tokens[idx]
+  return token.meta?.actviewCode ?? defaultFence(tokens, idx, options, env, self)
+}
+
+md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
+  const token = tokens[idx]
+  const href = token.attrGet('href')
+  if (href && !href.startsWith('#')) {
+    const isExternal = /^(?:https?:)?\/\//i.test(href)
+    if (isExternal) {
+      token.attrSet('target', '_blank')
+      token.attrSet('rel', 'noreferrer')
+      token.attrJoin('class', 'vp-external-link-icon')
+    } else if (/\.md(?:[?#]|$)/.test(href)) {
+      let next = href.replace(/\.md(?=([?#]|$))/, '')
+      next = next.replace(/(^|\/)index$/, '$1') || '/'
+      token.attrSet('href', next)
+    }
+  }
+  return defaultLinkOpen(tokens, idx, options, env, self)
+}
+
+md.renderer.rules.image = (tokens, idx, options, env, self) => {
+  const token = tokens[idx]
+  token.attrSet('loading', 'lazy')
+  token.attrSet('decoding', 'async')
+  return defaultImage(tokens, idx, options, env, self)
+}
 
 function inferTitle(
   frontmatter: Record<string, any>,
@@ -44,15 +97,21 @@ function inferTitle(
   }
   const h1 = /<h1[^>]*>([\s\S]*?)<\/h1>/i.exec(html)
   if (!h1) return ''
-  return h1[1].replace(/<[^>]+>/g, '').trim()
+  return h1[1]
+    .replace(/<a\b[^>]*class="header-anchor"[\s\S]*?<\/a>/i, '')
+    .replace(/<[^>]+>/g, '')
+    .trim()
 }
 
 function extractHeaders(html: string) {
   const headers: PageData['headers'] = []
-  const re = /<h([1-4])\s+[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/h\1>/gi
+  const re = /<h([1-6])\s+[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/h\1>/gi
   let match: RegExpExecArray | null
   while ((match = re.exec(html))) {
-    const title = match[3].replace(/<[^>]+>/g, '').trim()
+    const title = match[3]
+      .replace(/<a\b[^>]*class="header-anchor"[\s\S]*?<\/a>/i, '')
+      .replace(/<[^>]+>/g, '')
+      .trim()
     headers.push({
       level: Number(match[1]),
       title,
@@ -110,22 +169,29 @@ function assertSupported(html: string, file: string): void {
 
 /**
  * 把一个 Markdown 文件转成 ActView 页面模块源码。
- *
- * Phase 1 只支持：
- * - 标准 Markdown + HTML；
- * - frontmatter；
- * - 代码块 / 链接 / 标题 id；
- * - 生成页面 class 的 render() = htmlToVNode(html)。
- *
- * 不支持 Vue 模板指令、{{ }}、<script setup>。
  */
-export function markdownToActview(
+export async function markdownToActview(
   source: string,
   file: string,
-  _options: MarkdownToActviewOptions = {},
-): MarkdownToActviewResult {
+  options: MarkdownToActviewOptions = {},
+): Promise<MarkdownToActviewResult> {
   const parsed = matter(source)
-  const html = md.render(parsed.content)
+  const content = processIncludes(parsed.content, file)
+  const tokens = md.parse(content, {})
+  const lineNumbers = options.lineNumbers ?? false
+  const copyButtonTitle = options.codeCopyButtonTitle ?? 'Copy Code'
+
+  for (const token of tokens) {
+    if (token.type !== 'fence') continue
+    token.meta ??= {}
+    token.meta.actviewCode = await renderCodeBlock(token.content, token.info, {
+      lineNumbers,
+      active: !!token.meta.active,
+      copyButtonTitle,
+    })
+  }
+
+  const html = md.renderer.render(tokens, md.options, {})
   assertSupported(html, file)
 
   const relativePath = file.replace(/\\/g, '/').split('/').pop() ?? file
