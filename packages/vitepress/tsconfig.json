@@ -49,7 +49,10 @@
     "src/node/actviewPlugin.ts",
     "src/node/markdown/plugins.ts",
     "src/node/markdown/highlight.ts",
-    "src/node/markdown/includes.ts"
+    "src/node/markdown/includes.ts",
+    "src/node/markdown/extractScripts.ts",
+    "src/node/markdown/componentScript.ts",
+    "src/node/markdown/htmlToJsx.ts"
   ],
   "references": [
     { "path": "../shared" },

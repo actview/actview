@@ -76,13 +76,38 @@ describe('markdownToActview', () => {
     expect(result.code).toContain('Component({ name: "guide.md" })(Page)')
   })
 
-  it('拒绝 <script setup>', async () => {
+  it('script 内容整体提升并解析静态组件', async () => {
+    const result = await markdownToActview(
+      [
+        '<script component>',
+        "import { ActViewComponent, Component } from 'actview'",
+        "@Component({ name: 'Counter' })",
+        'class Counter extends ActViewComponent {',
+        '  render() { return <span>counter</span> }',
+        '}',
+        '</script>',
+        '',
+        '# Counter 示例',
+        '',
+        '<Counter />',
+      ].join('\n'),
+      'counter.md',
+    )
+
+    expect(result.code).toContain("import { ActViewComponent, Component } from 'actview'")
+    expect(result.code).toContain('class Counter extends ActViewComponent')
+    expect(result.code).toContain('<Counter />')
+    expect(result.code).toContain('@Component({ name: "counter.md" })')
+    expect(result.code).not.toContain('htmlToVNode')
+  })
+
+  it('未知组件会报错', async () => {
     await expect(
       markdownToActview(
-        '# Guide\n\n<script setup>const x = 1</script>',
-        'guide.md',
+        '<script>import { Counter } from "./counter"</script>\n\n<Missing />',
+        'counter.md',
       ),
-    ).rejects.toThrow(/script setup/)
+    ).rejects.toThrow(/Unknown component/)
   })
 
   it('拒绝 Vue 指令', async () => {

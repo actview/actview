@@ -6,6 +6,7 @@ export default {
       { text: 'Guide', link: '/' },
       { text: 'Guide page', link: '/guide' },
       { text: 'Markdown', link: '/markdown' },
+      { text: 'Counter', link: '/counter' },
     ],
     sidebar: [
       {
@@ -14,6 +15,8 @@ export default {
           { text: 'Markdown MVP', link: '/' },
           { text: 'Guide page', link: '/guide' },
           { text: 'Markdown 功能', link: '/markdown' },
+          { text: 'Counter', link: '/counter' },
+          { text: 'Inline Counter', link: '/counter-inline' },
         ],
       },
     ],

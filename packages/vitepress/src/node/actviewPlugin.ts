@@ -3,6 +3,7 @@
 // ============================================================
 
 import type { Plugin } from 'vite'
+import { transformWithEsbuild } from 'vite'
 import { markdownToActview } from './markdownToActview.ts'
 
 export interface ActviewMarkdownOptions {
@@ -29,6 +30,31 @@ export function actviewMarkdown(
         lineNumbers: options.lineNumbers,
         codeCopyButtonTitle: options.codeCopyButtonTitle,
       })
+
+      // .md 模块不会经过 .tsx 的 decorator 转换；组件页面在插件内先编译 TSX。
+      if (result.code.includes('@Component')) {
+        const transformed = await transformWithEsbuild(
+          result.code,
+          `${cleanId}.tsx`,
+          {
+            loader: 'tsx',
+            target: 'es2022',
+            jsx: 'automatic',
+            jsxImportSource: '@actview/jsx',
+            tsconfigRaw: {
+              compilerOptions: {
+                experimentalDecorators: true,
+                useDefineForClassFields: false,
+              },
+            },
+          },
+        )
+        return {
+          code: transformed.code,
+          map: transformed.map,
+        }
+      }
+
       return {
         code: result.code,
         map: null,

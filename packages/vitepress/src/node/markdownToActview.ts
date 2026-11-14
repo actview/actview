@@ -11,6 +11,12 @@ import { parseFragment, type DefaultTreeAdapterMap } from 'parse5'
 import { applyContainers, applyGithubAlerts, applyToc } from './markdown/plugins'
 import { renderCodeBlock } from './markdown/highlight'
 import { processIncludes } from './markdown/includes'
+import { extractScripts } from './markdown/extractScripts'
+import { collectComponents, hasNamedImport } from './markdown/componentScript'
+import {
+  balanceComponentTags,
+  htmlToJsx,
+} from './markdown/htmlToJsx'
 
 export interface PageData {
   title: string
@@ -45,8 +51,8 @@ md.use(anchor, {
     ariaHidden: true,
   }),
 })
-md.use(attrs)
-md.use(emoji)
+md.use(attrs as any)
+md.use(emoji as any)
 applyContainers(md)
 applyGithubAlerts(md)
 applyToc(md)
@@ -167,16 +173,99 @@ function assertSupported(html: string, file: string): void {
   }
 }
 
-/**
- * 把一个 Markdown 文件转成 ActView 页面模块源码。
- */
+function buildPageData(
+  parsed: matter.GrayMatterFile<string>,
+  html: string,
+  file: string,
+): PageData {
+  const relativePath = file.replace(/\\/g, '/').split('/').pop() ?? file
+  return {
+    title: inferTitle(parsed.data, html),
+    relativePath,
+    frontmatter: parsed.data as Record<string, any>,
+    headers: extractHeaders(html),
+  }
+}
+
+function buildPlainCode(html: string, pageData: PageData): string {
+  const wrappedHtml = `<div class="vp-doc">${html}</div>`
+  return `
+import { ActViewComponent, Component } from 'actview'
+import { htmlToVNode } from '@actview/vitepress'
+
+export const __pageData = ${JSON.stringify(pageData)}
+
+const PAGE_HTML = ${JSON.stringify(wrappedHtml)}
+
+class Page extends ActViewComponent {
+  render() {
+    return htmlToVNode(PAGE_HTML)
+  }
+}
+
+Component({ name: ${JSON.stringify(pageData.relativePath)} })(Page)
+export default Page
+`
+}
+
+function buildComponentCode(
+  script: string,
+  html: string,
+  pageData: PageData,
+): string {
+  const { components } = collectComponents(script)
+  const componentTags = new Set<string>()
+  for (const match of html.matchAll(/<([A-Z][\w-]*)\b/g)) {
+    componentTags.add(match[1].toLowerCase())
+  }
+  for (const tag of componentTags) {
+    if (!components[tag]) {
+      throw new Error(
+        `[actview/vitepress] ${pageData.relativePath}：Unknown component <${tag}>`,
+      )
+    }
+  }
+
+  const balanced = balanceComponentTags(html, components)
+  const jsx = htmlToJsx(balanced, { components })
+  const imports: string[] = []
+  if (!hasNamedImport(script, 'ActViewComponent')) {
+    imports.push("import { ActViewComponent } from 'actview'")
+  }
+  if (!hasNamedImport(script, 'Component')) {
+    imports.push("import { Component } from 'actview'")
+  }
+
+  return `
+${imports.join('\n')}
+${script}
+
+export const __pageData = ${JSON.stringify(pageData)}
+
+@Component({ name: ${JSON.stringify(pageData.relativePath)} })
+export class Page extends ActViewComponent {
+  render() {
+    return (
+      <>
+        ${jsx}
+      </>
+    )
+  }
+}
+
+export default Page
+`
+}
+
 export async function markdownToActview(
   source: string,
   file: string,
   options: MarkdownToActviewOptions = {},
 ): Promise<MarkdownToActviewResult> {
   const parsed = matter(source)
-  const content = processIncludes(parsed.content, file)
+  const included = processIncludes(parsed.content, file)
+  const extracted = extractScripts(included)
+  const content = extracted.source
   const tokens = md.parse(content, {})
   const lineNumbers = options.lineNumbers ?? false
   const copyButtonTitle = options.codeCopyButtonTitle ?? 'Copy Code'
@@ -193,33 +282,20 @@ export async function markdownToActview(
 
   const html = md.renderer.render(tokens, md.options, {})
   assertSupported(html, file)
+  const pageData = buildPageData(parsed, html, file)
+  const script = extracted.scripts.map((item) => item.content).join('\n')
 
-  const relativePath = file.replace(/\\/g, '/').split('/').pop() ?? file
-  const pageData: PageData = {
-    title: inferTitle(parsed.data, html),
-    relativePath,
-    frontmatter: parsed.data as Record<string, any>,
-    headers: extractHeaders(html),
+  if (extracted.scripts.length) {
+    return {
+      code: buildComponentCode(script, html, pageData),
+      html: `<div class="vp-doc">${html}</div>`,
+      pageData,
+    }
   }
 
-  const wrappedHtml = `<div class="vp-doc">${html}</div>`
-  const code = `
-import { ActViewComponent, Component } from 'actview'
-import { htmlToVNode } from '@actview/vitepress'
-
-export const __pageData = ${JSON.stringify(pageData)}
-
-const PAGE_HTML = ${JSON.stringify(wrappedHtml)}
-
-class Page extends ActViewComponent {
-  render() {
-    return htmlToVNode(PAGE_HTML)
+  return {
+    code: buildPlainCode(html, pageData),
+    html: `<div class="vp-doc">${html}</div>`,
+    pageData,
   }
-}
-
-Component({ name: ${JSON.stringify(relativePath)} })(Page)
-export default Page
-`
-
-  return { code, html: wrappedHtml, pageData }
 }

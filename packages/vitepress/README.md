@@ -59,6 +59,45 @@ actview-press dev <docs-root>
 
 示例见 [playground/vitepress/markdown.md](../playground/vitepress/markdown.md)。
 
+## Markdown 中的 ActView 组件
+
+`<script>` 内容会整体提升到生成模块顶部，并保留其中的 import、class 和装饰器：
+
+```md
+<script component>
+import { ActViewComponent, Component } from 'actview'
+
+@Component({ name: 'Counter' })
+class Counter extends ActViewComponent {
+  render() {
+    return <button>Counter</button>
+  }
+}
+</script>
+
+# Counter 示例
+
+<Counter />
+```
+
+支持的组件写法：
+
+- `<script>` / `<script component>` 内的 import 和 class
+- 默认导入、命名导入、`as` 别名
+- `<Counter />`、`<Counter>children</Counter>`
+- 静态属性，例如 `<Counter label="demo" />`
+
+暂不支持：
+
+- `v-if` / `v-for`
+- `{{ }}` 插值
+- `:prop` 动态绑定
+- `@event`
+- Vue `<script setup>` 的响应式语义
+
+示例见 [counter.md](../playground/vitepress/counter.md) 和
+[counter-inline.md](../playground/vitepress/counter-inline.md)。
+
 Markdown 渲染接口现在是异步的：
 
 ```ts
