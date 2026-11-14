@@ -28,6 +28,8 @@ export function scanMarkdownFiles(root: string): string[] {
         entry.name === 'node_modules' ||
         entry.name === '.vitepress' ||
         entry.name === 'dist' ||
+        entry.name === 'includes' ||
+        entry.name === 'snippets' ||
         entry.name.startsWith('.')
       ) {
         continue

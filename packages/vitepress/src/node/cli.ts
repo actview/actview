@@ -1,11 +1,12 @@
 import { existsSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import path from 'node:path'
-import { createServer, type Plugin } from 'vite'
+import { createServer, preview as vitePreview, type Plugin } from 'vite'
 import jsxScoped from '@10coding/vite-plugin-jsx-scoped'
 import { actviewMarkdown } from './actviewPlugin'
 import { buildRouteMap, scanMarkdownFiles, type DynamicRouteConfig } from './routeMap'
 import { getGitTimestamp } from './git'
+import { buildSite } from './build'
 
 const VIRTUAL_SITE = 'virtual:actview-site'
 
@@ -182,7 +183,21 @@ export async function runCli(argv: string[] = process.argv.slice(2)): Promise<vo
     await dev(options)
     return
   }
-  console.error(`[actview] 暂不支持命令：${command}（当前支持 dev）`)
+  if (command === 'build') {
+    const options = await createActPressOptions(docsRoot)
+    await buildSite(options)
+    return
+  }
+  if (command === 'preview') {
+    const previewServer = await vitePreview({
+      root: path.resolve(docsRoot),
+      configFile: false,
+      build: { outDir: path.resolve(docsRoot, '.vitepress', 'dist') },
+    })
+    previewServer.printUrls()
+    return
+  }
+  console.error(`[actview] 暂不支持命令：${command}（当前支持 dev / build / preview）`)
   process.exitCode = 1
 }
 

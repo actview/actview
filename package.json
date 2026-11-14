@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "pnpm -C playground/actview dev",
     "dev:vitepress": "tsx packages/vitepress/src/node/cli.ts dev playground/vitepress",
-    "build:vitepress": "pnpm -C packages/vitepress build",
+    "preview:vitepress": "tsx packages/vitepress/src/node/cli.ts preview playground/vitepress",
+    "build:vitepress": "tsx packages/vitepress/src/node/cli.ts build playground/vitepress",
     "build": "pnpm -C playground/actview build",
     "build:packages": "pnpm --filter \"./packages/*\" run build",
     "build:extension": "vite build --config extensions/devtools/vite.config.ts",

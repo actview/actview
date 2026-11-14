@@ -26,6 +26,29 @@ CLI：
 
 ```bash
 actview-press dev <docs-root>
+actview-press build <docs-root>
+actview-press preview <docs-root>
+```
+
+构建产物默认输出到：
+
+```text
+<docs-root>/.vitepress/dist/
+```
+
+`build` 会生成：
+
+- 入口 `index.html`
+- 每个已配置路由的 `index.html`
+- `404.html`
+- 共享 JS / CSS / 字体资源
+- `public/` 静态资源
+
+站点预览：
+
+```bash
+pnpm build:vitepress
+pnpm preview:vitepress
 ```
 
 当前 CLI 导出：

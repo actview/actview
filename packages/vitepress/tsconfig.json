@@ -38,6 +38,7 @@
     "src/node/cli.ts",
     "src/node/routeMap.ts",
     "src/node/git.ts",
+    "src/node/build.ts",
     "src/client/markdown",
     "src/client/theme-default/Layout.tsx",
     "src/client/theme-default/components",
