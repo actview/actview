@@ -60,6 +60,25 @@ export function applyContainers(md: Md): void {
   applyCodeGroup(md)
 }
 
+function htmlBlockTitle(content: string): string {
+  return /data-title="([^"]*)"/i.exec(content)?.[1]?.trim() ?? ''
+}
+
+function activateHtmlBlock(content: string): string {
+  return content.replace(
+    /class="([^"]*\blanguage-[^"]*)"/i,
+    'class="$1 active"',
+  )
+}
+
+function fenceTitle(info: string): string {
+  return (
+    info.match(/\[([^\]]*)\]/)?.[1]?.trim() ||
+    info.match(/^[a-zA-Z0-9-_]+/)?.[0] ||
+    'txt'
+  )
+}
+
 function applyCodeGroup(md: Md): void {
   md.core.ruler.after('block', 'actview-code-group-active', (state) => {
     const tokens = state.tokens
@@ -77,9 +96,20 @@ function applyCodeGroup(md: Md): void {
       }
       let first = true
       for (let j = i + 1; j < end; j++) {
-        if (tokens[j].type !== 'fence') continue
+        const token = tokens[j]
+        const isFence = token.type === 'fence' && token.tag === 'code'
+        const isHtml = token.type === 'html_block'
+        if (!isFence && !isHtml) continue
+        const title = isHtml ? htmlBlockTitle(token.content) : fenceTitle(token.info)
+        // 没有 tab 标题的 HTML block 不参与激活，避免选中的 tab 与
+        // 实际显示的 block 不一致。
+        if (!title) continue
         if (first) {
-          ;(tokens[j].meta ??= {}).active = true
+          if (isFence) {
+            ;(token.meta ??= {}).active = true
+          } else {
+            token.content = activateHtmlBlock(token.content)
+          }
           first = false
         }
       }
@@ -89,7 +119,6 @@ function applyCodeGroup(md: Md): void {
     render(tokens: Token[], idx: number) {
       if (tokens[idx].nesting === -1) return '</div></div>\n'
       let tabs = ''
-      let checked = true
       const start = idx + 1
       let end = start
       while (
@@ -104,16 +133,17 @@ function applyCodeGroup(md: Md): void {
       let tabIndex = 0
       for (let i = start; i < end; i++) {
         const token = tokens[i]
-        if (token.type !== 'fence') continue
-        const title =
-          token.info.match(/\[([^\]]*)\]/)?.[1]?.trim() ||
-          token.info.match(/^[a-zA-Z0-9-_]+/)?.[0] ||
-          'txt'
-        const id = `tab-${idx}-${tabIndex++}`
+        const isFence = token.type === 'fence' && token.tag === 'code'
+        const isHtml = token.type === 'html_block'
+        if (!isFence && !isHtml) continue
+        const title = isHtml ? htmlBlockTitle(token.content) : fenceTitle(token.info)
+        if (!title) continue
+        const id = `tab-${idx}-${tabIndex}`
+        const isFirst = tabIndex === 0
+        tabIndex++
         tabs += `<input type="radio" name="group-${idx}" id="${id}"${
-          checked ? ' checked' : ''
+          isFirst ? ' checked' : ''
         }><label data-title="${escapeHtml(title)}" for="${id}">${escapeHtml(title)}</label>`
-        checked = false
       }
       return `<div class="vp-code-group"><div class="tabs">${tabs}</div><div class="blocks">\n`
     },

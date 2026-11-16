@@ -70,6 +70,28 @@ describe('P2 markdown features', () => {
     })
     expect(result.html).toContain('<mark>highlight</mark>')
   })
+
+  it('code group supports HTML blocks and first-tab activation', async () => {
+    const result = await markdownToActview(
+      [
+        '::: code-group',
+        '<div class="language-html" data-title="HTML">',
+        '<pre><code>&lt;div&gt;hi&lt;/div&gt;</code></pre>',
+        '</div>',
+        '',
+        '```ts [TS]',
+        'const x = 1',
+        '```',
+        ':::',
+      ].join('\n'),
+      'group.md',
+    )
+
+    expect(result.html).toContain('data-title="HTML"')
+    expect(result.html).toContain('class="language-html active"')
+    expect(result.html).toContain('id="tab-0-0" checked')
+    expect(result.html).toContain('data-title="TS"')
+  })
 })
 
 describe('P2 route map', () => {

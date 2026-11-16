@@ -76,6 +76,10 @@ const app = createApp()
 app.mount('#app')
 ```
 
+<div class="language-html" data-title="HTML">
+<pre><code>&lt;div id="app"&gt;&lt;/div&gt;</code></pre>
+</div>
+
 :::
 
 ### 复制按钮
