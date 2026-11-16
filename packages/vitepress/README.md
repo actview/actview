@@ -56,7 +56,7 @@ pnpm preview:vitepress
 ```json
 {
   "bin": {
-    "vitepress-actview": "./bin/actview-press.js"
+    "vitepress-actview": "./bin/vitepress-actview.js"
   }
 }
 ```
