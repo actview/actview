@@ -71,6 +71,17 @@ describe('P2 markdown features', () => {
     expect(result.html).toContain('<mark>highlight</mark>')
   })
 
+  it('uses readable Unicode heading ids and one visual anchor', async () => {
+    const result = await markdownToActview('## 链接与图片', 'heading.md')
+
+    expect(result.html).toContain('id="链接与图片"')
+    expect(result.html).toContain('href="#链接与图片"')
+    expect(result.html).toContain('aria-label="Permalink to “链接与图片”"')
+    expect(result.html).toContain('&#8203;')
+    expect(result.html).not.toContain('%E9%93%BE')
+    expect(result.html).not.toContain('>#</a>')
+  })
+
   it('code group supports HTML blocks and first-tab activation', async () => {
     const result = await markdownToActview(
       [

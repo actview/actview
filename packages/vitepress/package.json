@@ -17,6 +17,7 @@
     "@10coding/vite-plugin-jsx-scoped": "^0.6.0",
     "@actview/core": "workspace:^",
     "@actview/reactivity": "workspace:^",
+    "@mdit-vue/shared": "^4.0.0",
     "@traptitech/markdown-it-katex": "^3.6.0",
     "actview": "workspace:*",
     "gray-matter": "^4.0.3",

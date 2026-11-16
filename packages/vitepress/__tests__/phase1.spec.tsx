@@ -53,7 +53,9 @@ describe('htmlToVNode', () => {
     const app = createApp(Page)
     app.mount(root)
 
-    expect(root.querySelector('h1')?.textContent).toBe('Mounted #')
+    expect(root.querySelector('h1')?.textContent?.replace(/\u200b/g, '')).toBe(
+      'Mounted ',
+    )
     expect(root.querySelector('strong')?.textContent).toBe('world')
 
     app.unmount()

@@ -8,6 +8,7 @@ import anchor from 'markdown-it-anchor'
 import attrs from 'markdown-it-attrs'
 import { full as emoji } from 'markdown-it-emoji'
 import { parseFragment, type DefaultTreeAdapterMap } from 'parse5'
+import { slugify } from '@mdit-vue/shared'
 import katex from '@traptitech/markdown-it-katex'
 import cjkFriendly from 'markdown-it-cjk-friendly'
 import path from 'node:path'
@@ -62,11 +63,34 @@ const md = new MarkdownIt({
 
 md.use(anchor, {
   level: [1, 2, 3, 4, 5, 6],
-  permalink: anchor.permalink.linkInsideHeader({
-    symbol: '#',
-    placement: 'after',
-    ariaHidden: true,
-  }),
+  slugify,
+  permalink: (slug: string, _options: any, state: any, idx: number) => {
+    const title =
+      state.tokens[idx + 1]?.children
+        ?.filter((token: any) =>
+          ['text', 'code_inline'].includes(token.type),
+        )
+        .reduce((acc: string, token: any) => acc + token.content, '')
+        .trim() || ''
+
+    const linkTokens = [
+      Object.assign(new state.Token('text', '', 0), { content: ' ' }),
+      Object.assign(new state.Token('link_open', 'a', 1), {
+        attrs: [
+          ['class', 'header-anchor'],
+          ['href', `#${slug}`],
+          ['aria-label', `Permalink to “${title}”`],
+        ],
+      }),
+      Object.assign(new state.Token('html_inline', '', 0), {
+        content: '&#8203;',
+        meta: { isPermalinkSymbol: true },
+      }),
+      new state.Token('link_close', 'a', -1),
+    ]
+
+    state.tokens[idx + 1].children?.push(...linkTokens)
+  },
 })
 md.use(attrs as any)
 md.use(emoji as any)
