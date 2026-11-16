@@ -156,6 +156,9 @@ importers:
       markdown-it-emoji:
         specifier: ^3.1.0
         version: 3.1.0
+      minisearch:
+        specifier: ^7.2.0
+        version: 7.2.0
       parse5:
         specifier: ^7.2.1
         version: 7.2.1
@@ -1919,6 +1922,9 @@ packages:
 
   micromark-util-types@2.0.3:
     resolution: {integrity: sha512-oxB2Ik03hI0gv+VNn9tnh1t1YEe9MDPptViAEgfdf3YQHsn0pzGTgCdlSCJXcwhqm8phaEuM7zeEu3QQzVBrPg==}
+
+  minisearch@7.2.0:
+    resolution: {integrity: sha512-dqT2XBYUOZOiC5t2HRnwADjhNS2cecp9u+TJRiJ1Qp/f5qjkeT5APcGPjHw+bz89Ms8Jp+cG4AlE+QZ/QnDglg==}
 
   mlly@1.8.2:
     resolution: {integrity: sha512-d+ObxMQFmbt10sretNDytwt85VrbkhhUA/JBGm1MPaWJ65Cl4wOgLaB1NYvJSZ0Ef03MMEU/0xpPMXUIQ29UfA==}
@@ -3932,6 +3938,8 @@ snapshots:
   micromark-util-symbol@2.0.0: {}
 
   micromark-util-types@2.0.3: {}
+
+  minisearch@7.2.0: {}
 
   mlly@1.8.2:
     dependencies:

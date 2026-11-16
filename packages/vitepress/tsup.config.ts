@@ -22,6 +22,7 @@ export default defineConfig({
     '@actview/core',
     'vite',
     'virtual:actview-site',
+    'virtual:actview-search-index',
     /\.css(\?.*)?$/,
   ],
 })

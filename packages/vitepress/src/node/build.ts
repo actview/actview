@@ -6,6 +6,7 @@ import jsxScoped from '@10coding/vite-plugin-jsx-scoped'
 import { actviewMarkdown } from './actviewPlugin'
 import { buildRouteMap, scanMarkdownFiles } from './routeMap'
 import { getGitTimestamp } from './git'
+import { localSearchPlugin } from './localSearchPlugin'
 import type { ActPressConfig, ActPressOptions } from './cli'
 
 const VIRTUAL_SITE = 'virtual:actview-site'
@@ -130,6 +131,16 @@ export async function buildSite(options: ActPressOptions): Promise<void> {
         markdownConfig: options.config.markdown,
         getLastUpdated:
           options.config.lastUpdated === false ? undefined : getGitTimestamp,
+      }),
+      localSearchPlugin({
+        pages,
+        root: docsRoot,
+        enabled: options.config.themeConfig?.search?.provider === 'local',
+        rewrites: options.config.rewrites,
+        dynamicRoutes: options.config.dynamicRoutes,
+        ignoreDeadLinks: options.config.ignoreDeadLinks,
+        transformPageData: options.config.transformPageData,
+        markdownConfig: options.config.markdown,
       }),
     ],
     build: {

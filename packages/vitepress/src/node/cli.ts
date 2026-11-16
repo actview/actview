@@ -7,6 +7,7 @@ import { actviewMarkdown } from './actviewPlugin'
 import { buildRouteMap, scanMarkdownFiles, type DynamicRouteConfig } from './routeMap'
 import { getGitTimestamp } from './git'
 import { buildSite } from './build'
+import { localSearchPlugin } from './localSearchPlugin'
 
 const VIRTUAL_SITE = 'virtual:actview-site'
 
@@ -153,6 +154,16 @@ export async function dev(options: ActPressOptions): Promise<void> {
         markdownConfig: options.config.markdown,
         getLastUpdated:
           options.config.lastUpdated === false ? undefined : getGitTimestamp,
+      }),
+      localSearchPlugin({
+        pages,
+        root: docsRoot,
+        enabled: options.config.themeConfig?.search?.provider === 'local',
+        rewrites: options.config.rewrites,
+        dynamicRoutes: options.config.dynamicRoutes,
+        ignoreDeadLinks: options.config.ignoreDeadLinks,
+        transformPageData: options.config.transformPageData,
+        markdownConfig: options.config.markdown,
       }),
       htmlFallbackPlugin(entryPath),
     ],

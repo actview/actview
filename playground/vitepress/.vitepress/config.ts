@@ -45,6 +45,9 @@ export default {
     },
   },
   themeConfig: {
+    search: {
+      provider: 'local',
+    },
     nav: [
       {
         text: '指南',
@@ -76,6 +79,7 @@ export default {
           { text: '使用组件', link: '/guide/using-components' },
           { text: 'Math', link: '/guide/math' },
           { text: 'CJK 友好', link: '/guide/cjk' },
+          { text: '本地搜索', link: '/guide/search' },
         ],
       },
       {
