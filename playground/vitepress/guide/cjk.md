@@ -1,6 +1,6 @@
 # CJK 友好 {#cjk}
 
-ActView Press 接入了 `markdown-it-cjk-friendly`，用于改善中文、日文、韩文紧邻强调符时的解析。
+vitepress-actview 接入了 `markdown-it-cjk-friendly`，用于改善中文、日文、韩文紧邻强调符时的解析。
 
 ## 输入 {#input}
 

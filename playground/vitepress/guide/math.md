@@ -1,6 +1,6 @@
 # Math {#math}
 
-ActView Press 使用 KaTeX 渲染数学公式。
+vitepress-actview 使用 KaTeX 渲染数学公式。
 
 ## 行内公式 {#inline}
 

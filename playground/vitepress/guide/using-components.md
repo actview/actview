@@ -21,7 +21,7 @@ class InlineCounter extends ActViewComponent {
 
 # 使用组件 {#using-components}
 
-ActView Press 支持在 Markdown 中直接使用 ActView 类组件。
+vitepress-actview 支持在 Markdown 中直接使用 ActView 类组件。
 
 ## 导入组件 {#import-component}
 

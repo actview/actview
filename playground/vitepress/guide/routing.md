@@ -1,6 +1,6 @@
 # 路由 {#routing}
 
-ActView Press 使用文件路由，并在客户端使用 SPA 导航。
+vitepress-actview 使用文件路由，并在客户端使用 SPA 导航。
 
 ## 文件路由 {#file-based-routing}
 

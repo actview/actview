@@ -1,6 +1,6 @@
 # Markdown 扩展 {#markdown-extensions}
 
-ActView Press 在标准 Markdown 之上提供了文档常用的扩展。
+vitepress-actview 在标准 Markdown 之上提供了文档常用的扩展。
 
 [[toc]]
 

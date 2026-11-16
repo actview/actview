@@ -1,16 +1,16 @@
 ---
 layout: home
-title: ActView Press
+title: vitepress-actview
 description: 由 Vite 驱动的 ActView 文档站点生成器
 
 hero:
-  name: ActView Press
+  name: vitepress-actview
   text: 用 Markdown 和 ActView 组件构建文档
   tagline: Vite 驱动，组件优先，开箱即用的默认主题
   actions:
     - theme: brand
-      text: 什么是 ActView Press？
-      link: /guide/what-is-actview-press
+      text: 什么是 vitepress-actview？
+      link: /guide/what-is-vitepress-actview
     - theme: alt
       text: 快速开始
       link: /guide/getting-started
@@ -33,13 +33,13 @@ features:
     details: 导航栏、侧边栏、页脚、代码块、TOC 与 Math 开箱即用。
 ---
 
-## 为什么使用 ActView Press？
+## 为什么使用 vitepress-actview？
 
-ActView Press 面向 ActView 生态的文档站点：
+vitepress-actview 面向 ActView 生态的文档站点：
 
 - Markdown 内容与 ActView 组件在同一个页面中使用
 - 复用默认主题的 VitePress 风格布局
 - CLI 负责 `dev`、`build`、`preview`
 - 支持中文标题、代码组、Math、CJK 和自定义 markdown-it 插件
 
-从[快速开始](/guide/getting-started)开始，或者先了解[它是什么](/guide/what-is-actview-press)。
+从[快速开始](/guide/getting-started)开始，或者先了解[它是什么](/guide/what-is-vitepress-actview)。

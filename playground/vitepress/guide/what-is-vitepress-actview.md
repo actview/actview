@@ -1,6 +1,6 @@
-# ActView Press 是什么？ {#what-is-actview-press}
+# vitepress-actview 是什么？ {#what-is-vitepress-actview}
 
-ActView Press 是一个面向 ActView 的文档站点工具。它从 Markdown 生成页面，用默认主题提供导航、侧边栏、目录和代码块体验，并允许在 Markdown 中直接使用 ActView 组件。
+vitepress-actview 是一个面向 ActView 的文档站点工具。它从 Markdown 生成页面，用默认主题提供导航、侧边栏、目录和代码块体验，并允许在 Markdown 中直接使用 ActView 组件。
 
 ## 使用场景 {#use-cases}
 
@@ -47,6 +47,6 @@ pnpm preview:vitepress
 
 ## 与 VitePress 的关系 {#relationship-with-vitepress}
 
-ActView Press 借鉴了 VitePress 的文档结构和默认主题视觉，但页面由 ActView 类组件渲染，Markdown 管线也会生成 ActView 模块。
+vitepress-actview 借鉴了 VitePress 的文档结构和默认主题视觉，但页面由 ActView 类组件渲染，Markdown 管线也会生成 ActView 模块。
 
 它不是 VitePress 的运行时替代品；已有的 VitePress 文档可以按 [Markdown 扩展](/guide/markdown) 和 [使用组件](/guide/using-components) 的方式逐步迁移。

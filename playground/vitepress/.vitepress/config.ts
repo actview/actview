@@ -1,5 +1,5 @@
 export default {
-  title: 'ActView Press',
+  title: 'vitepress-actview',
   description: '由 Vite 驱动的 ActView 文档站点生成器',
   lastUpdated: true,
   rewrites: {
@@ -48,7 +48,7 @@ export default {
     nav: [
       {
         text: '指南',
-        link: '/guide/what-is-actview-press',
+        link: '/guide/what-is-vitepress-actview',
         activeMatch: '/guide/',
       },
       {
@@ -62,8 +62,8 @@ export default {
         text: '简介',
         items: [
           {
-            text: '什么是 ActView Press？',
-            link: '/guide/what-is-actview-press',
+            text: '什么是 vitepress-actview？',
+            link: '/guide/what-is-vitepress-actview',
           },
           { text: '快速开始', link: '/guide/getting-started' },
           { text: '路由', link: '/guide/routing' },

@@ -17,7 +17,7 @@
 export default {
   themeConfig: {
     nav: [
-      { text: '指南', link: '/guide/what-is-actview-press' },
+      { text: '指南', link: '/guide/what-is-vitepress-actview' },
     ],
     sidebar: [
       {

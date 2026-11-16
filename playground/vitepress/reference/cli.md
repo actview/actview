@@ -1,6 +1,6 @@
 # CLI {#cli}
 
-ActView Press 提供三个命令：
+vitepress-actview 提供三个命令：
 
 ```bash
 vitepress-actview dev <docs-root>
