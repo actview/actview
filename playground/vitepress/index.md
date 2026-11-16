@@ -25,10 +25,7 @@ features:
   - icon: ⚡
     title: Vite 驱动
     details: 秒级启动，HMR 即时反馈，生产构建输出静态资源。
-  - icon:
-      src: /actview-logo.svg
-      alt: ActView logo
-      wrap: true
+  - icon: 🧩
     title: ActView 组件
     details: 在 Markdown 中直接使用 ActView 类组件，保持类型和渲染一致。
   - icon: 🎯
