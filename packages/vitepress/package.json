@@ -11,7 +11,7 @@
     "./cli": "./src/node/cli.ts"
   },
   "bin": {
-    "actview-press": "./bin/actview-press.js"
+    "vitepress-actview": "./bin/actview-press.js"
   },
   "dependencies": {
     "@10coding/vite-plugin-jsx-scoped": "^0.6.0",

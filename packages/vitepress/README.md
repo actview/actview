@@ -25,9 +25,9 @@ pnpm dev:vitepress
 CLI：
 
 ```bash
-actview-press dev <docs-root>
-actview-press build <docs-root>
-actview-press preview <docs-root>
+vitepress-actview dev <docs-root>
+vitepress-actview build <docs-root>
+vitepress-actview preview <docs-root>
 ```
 
 构建产物默认输出到：
@@ -56,7 +56,7 @@ pnpm preview:vitepress
 ```json
 {
   "bin": {
-    "actview-press": "./bin/actview-press.js"
+    "vitepress-actview": "./bin/actview-press.js"
   }
 }
 ```
