@@ -80,7 +80,7 @@ pnpm preview:vitepress
 - 内部 `.md` 链接规范化、外链 `target="_blank"`
 - 图片 `loading="lazy"`
 
-示例见 [playground/vitepress/markdown.md](../playground/vitepress/markdown.md)。
+示例见 [guide/markdown.md](../playground/vitepress/guide/markdown.md)。
 
 ## Markdown 中的 ActView 组件
 
@@ -118,8 +118,7 @@ class Counter extends ActViewComponent {
 - `@event`
 - Vue `<script setup>` 的响应式语义
 
-示例见 [counter.md](../playground/vitepress/counter.md) 和
-[counter-inline.md](../playground/vitepress/counter-inline.md)。
+示例见 [guide/using-components.md](../playground/vitepress/guide/using-components.md)。
 
 ## P2 能力
 
@@ -128,8 +127,8 @@ CLI 配置支持：
 ```ts
 export default {
   lastUpdated: true,
-  rewrites: { '/guide': '/old-guide' },
-  dynamicRoutes: [{ path: '/dynamic/42', file: 'dynamic.md' }],
+  rewrites: { '/guide/routing': '/guide/old-routing' },
+  dynamicRoutes: [{ path: '/guide/dynamic/42', file: 'guide/dynamic.md' }],
   transformPageData(data) {
     return { title: data.title.toUpperCase() }
   },
@@ -154,9 +153,9 @@ export default {
 
 示例页面：
 
-- [p2-math.md](../playground/vitepress/p2-math.md)
-- [p2-cjk.md](../playground/vitepress/p2-cjk.md)
-- [p2-config.md](../playground/vitepress/p2-config.md)
+- [guide/math.md](../playground/vitepress/guide/math.md)
+- [guide/cjk.md](../playground/vitepress/guide/cjk.md)
+- [reference/config.md](../playground/vitepress/reference/config.md)
 
 Markdown 渲染接口现在是异步的：
 

@@ -1,18 +1,18 @@
 export default {
-  title: 'ActView Docs',
-  description: 'ActView documentation site',
+  title: 'ActView Press',
+  description: '由 Vite 驱动的 ActView 文档站点生成器',
   lastUpdated: true,
   rewrites: {
-    '/guide': '/old-guide',
+    '/guide/routing': '/guide/old-routing',
   },
   dynamicRoutes: [
     {
-      path: '/dynamic/42',
-      file: 'dynamic.md',
+      path: '/guide/dynamic/42',
+      file: 'guide/dynamic.md',
     },
   ],
   transformPageData(data: any) {
-    if (data.relativePath === 'p2-transform.md') {
+    if (data.relativePath === 'guide/transform-page-data.md') {
       return {
         title: 'Transformed Page Title',
         frontmatter: {
@@ -46,42 +46,80 @@ export default {
   },
   themeConfig: {
     nav: [
-      { text: 'Guide', link: '/' },
-      { text: 'Guide page', link: '/guide' },
-      { text: 'Markdown', link: '/markdown' },
-      { text: 'Counter', link: '/counter' },
-      { text: 'P2', link: '/p2-math' },
+      {
+        text: '指南',
+        link: '/guide/what-is-actview-press',
+        activeMatch: '/guide/',
+      },
+      {
+        text: '参考',
+        link: '/reference/cli',
+        activeMatch: '/reference/',
+      },
     ],
     sidebar: [
       {
-        text: 'Guide',
+        text: '简介',
         items: [
-          { text: 'Markdown MVP', link: '/' },
-          { text: 'Guide page', link: '/guide' },
-          { text: 'Markdown 功能', link: '/markdown' },
-          { text: 'Counter', link: '/counter' },
-          { text: 'Inline Counter', link: '/counter-inline' },
+          {
+            text: '什么是 ActView Press？',
+            link: '/guide/what-is-actview-press',
+          },
+          { text: '快速开始', link: '/guide/getting-started' },
+          { text: '路由', link: '/guide/routing' },
         ],
       },
       {
-        text: 'P2',
+        text: '写作',
         items: [
-          { text: 'Math', link: '/p2-math' },
-          { text: 'CJK', link: '/p2-cjk' },
-          { text: 'Transform Page Data', link: '/p2-transform' },
-          { text: 'Custom markdown-it', link: '/p2-custom' },
-          { text: 'P2 配置', link: '/p2-config' },
-          { text: 'Dynamic Route', link: '/dynamic/42' },
-          { text: 'Rewritten Guide', link: '/old-guide' },
+          { text: 'Markdown 扩展', link: '/guide/markdown' },
+          { text: '使用组件', link: '/guide/using-components' },
+          { text: 'Math', link: '/guide/math' },
+          { text: 'CJK 友好', link: '/guide/cjk' },
+        ],
+      },
+      {
+        text: '进阶',
+        items: [
+          {
+            text: '自定义 markdown-it',
+            link: '/guide/custom-markdown',
+          },
+          {
+            text: 'transformPageData',
+            link: '/guide/transform-page-data',
+          },
+          { text: '最后更新时间', link: '/guide/last-updated' },
+          { text: '动态路由', link: '/guide/dynamic/42' },
+          {
+            text: 'Rewrites 示例',
+            link: '/guide/old-routing',
+          },
+        ],
+      },
+      {
+        text: '参考',
+        items: [
+          { text: 'CLI', link: '/reference/cli' },
+          { text: '站点配置', link: '/reference/config' },
+          { text: '页面数据', link: '/reference/page-data' },
+          { text: '默认主题', link: '/reference/default-theme' },
         ],
       },
     ],
     outline: [2, 3],
+    outlineTitle: '页面导航',
     aside: true,
     footer: {
-      message: 'Built with ActView',
-      copyright: 'ActView documentation',
+      message: '基于 MIT 许可发布',
+      copyright: '版权所有 © ActView',
     },
-    docFooter: { prev: 'Previous page', next: 'Next page' },
+    docFooter: {
+      prev: '上一页',
+      next: '下一页',
+    },
+    lastUpdated: {
+      text: '最后更新于',
+    },
   },
 }
