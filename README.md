@@ -18,6 +18,7 @@ packages/
   vitepress/        ActView 文档站工具（VitePress 迁移中）
   devtools/         DevTools backend（无 UI 时可单独使用）
   router/           路由（RouterView / RouterLink / guards）
+  i18n/             国际化（locale / messages / 插值 / 复数）
   jsx/              JSX 作者层（全局 JSX 类型 / jsx automatic runtime）
   reactivity/       响应式系统（core 内部使用）
   shared/           内部共享工具
@@ -92,6 +93,7 @@ export class Counter extends ActViewComponent<{ initial?: number }> {
 - [docs/ssr.md](docs/ssr.md) — SSR / hydration 分层、流程与边界
 - [packages/server/README.md](packages/server/README.md) — SSR / hydration 使用说明
 - [packages/router/README.md](packages/router/README.md) — 路由 v1 使用说明
+- [packages/i18n/README.md](packages/i18n/README.md) — 国际化使用说明
 - [extensions/devtools/README.md](extensions/devtools/README.md) — Chrome DevTools 扩展 v0.1
 - [docs/renderer.md](docs/renderer.md) — 渲染器 / patch / 内置组件
 - [docs/roadmap.md](docs/roadmap.md) — 框架能力路线图与第一版限制

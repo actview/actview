@@ -13,6 +13,7 @@
 - 生命周期 hooks、错误传播、DevTools hook / `@actview/devtools` backend + 扩展 v0.1（Components / Events / Performance；基础高亮 / 元素选择）、provide/inject；
 - App 插件契约：`app.use` / `app.onUnmount` / `app.config`（devtools / performance / warnHandler）；
 - `@actview/router` v1：RouterView/RouterLink、嵌套路由/params/query、guards、lazy、三种 history；
+- `@actview/i18n` v1：locale/messages、插值/复数/fallback、响应式 locale、`useI18n`；
 - `@actview/server`：SSR Phase 1–4 基础链路（renderToString / async SSR / hydration / Router SSR / head-state）；
 - JSX 类型层与 `@actview/jsx` automatic runtime；
 - 构建、类型检查、单元测试、playground。
@@ -89,7 +90,7 @@
 
 21. **CLI / 脚手架**：`create-actview`、模板、升级命令。
 22. **文档与示例**：API reference、教程、迁移指南、在线 playground。
-23. **生态包**：数据请求/缓存、表单校验、i18n、状态管理、UI 组件库。
+23. **生态包**：数据请求/缓存、表单校验、状态管理、UI 组件库（i18n v1 已实现）。
 24. **发布与质量**：ESM/CJS/类型产物、tree-shaking/sideEffects、浏览器/Node 支持矩阵、CI/E2E/视觉回归/bundle size、changesets 发布、装饰器 Stage 3。
 
 ## 7. 建议顺序

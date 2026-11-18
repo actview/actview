@@ -26,6 +26,7 @@ packages/
   core/             类型 + 渲染器 + 装饰器 + 内置组件
   devtools/         DevTools backend（无 UI）
   router/           路由
+  i18n/             国际化
   jsx/              JSX 作者层
   reactivity/       响应式系统（内部）
   shared/           内部工具
@@ -53,8 +54,8 @@ extensions/
 pnpm dev            # playground/actview（Vite）
 pnpm build          # playground: tsc -b + vite build
 pnpm preview        # playground 预览
-pnpm typecheck      # 7 包 + playground
-pnpm test           # vitest（reactivity + core + devtools + router）
+pnpm typecheck      # 全部包 + playground
+pnpm test           # vitest（reactivity + core + devtools + router + i18n）
 pnpm build:packages # tsup 各包（含 d.ts）
 pnpm build:extension # ActView 实现的面板 UI → extensions/devtools/build/panel.js
 ```

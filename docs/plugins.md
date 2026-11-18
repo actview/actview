@@ -142,14 +142,26 @@ app.use(loggerPlugin, {
 })
 ```
 
-### P1 `@actview/i18n`
+### P1 `@actview/i18n`（v1 已实现）
+
+- `createI18n({ locale, fallbackLocale, messages })`；
+- 插件安装：`app.use(i18n)` / `app.provide(i18nKey)`；
+- 类组件 `@Inject(i18nKey)`，setup 内 `useI18n()`；
+- 插值、嵌套 key、复数、fallback、`te` / `tm`；
+- locale 响应式；`setLocale` / `setLocaleMessage` / `onLocaleChange`。
 
 ```tsx
-app.use(i18nPlugin, { locale: 'zh', messages })
+const i18n = createI18n({
+  locale: 'en',
+  fallbackLocale: 'zh',
+  messages: { en: { hello: 'Hello {name}' } },
+})
+
+createApp(App).use(i18n).mount('#app')
 
 @Model
 class PageModel {
-  @Inject(I18nKey) i18n!: I18n
+  @Inject(i18nKey) i18n!: I18n
   @Computed get title() { return this.i18n.t('page.title') }
 }
 ```
